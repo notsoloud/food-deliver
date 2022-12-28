@@ -19,6 +19,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -49,6 +50,9 @@ public class FoodDeliveryWebAppApplicationTests {
 		Mockito.when(foodRepository.save(any())).thenReturn(foodEntity1);
 		Mockito.when(foodRepository.findByFoodId("987654")).thenReturn(foodEntity1);
 		Mockito.when(foodRepository.findByFoodId("98765")).thenReturn(null);
+		List<FoodEntity> foodEntityList = new ArrayList<>();
+		foodEntityList.add(foodEntity1);
+		Mockito.when(foodRepository.findAll()).thenReturn(foodEntityList);
 	}
 
 	@Test
@@ -90,19 +94,66 @@ public class FoodDeliveryWebAppApplicationTests {
 		}
 	}
 
-//	@Test
-//	public void testOrderCreatedSuccess() {
-//		OrderDto orderDto = new OrderDto();
-//		orderDto.setOrderId("1234");
-//		orderDto.setId(12345);
-//		orderDto.setCost(24.5F);
-//		orderDto.setStatus(Boolean.TRUE);
-//		orderDto.setUserId("3076");
-//		String[] items = ["soap","chips"];
-//		orderDto.setItems(items);
-//		Mockito.when(orderRepository.save(any())).thenReturn(orderDto);
-//		OrderDto response = orderServiceImpl.createOrder(orderDto);
-//
-//	}
+	@Test
+	public void testUpdateFoodDetailsSuccess() {
+		FoodDto foodDto1 = new FoodDto();
+		foodDto1.setId(987654);
+		foodDto1.setFoodId("987654");
+		foodDto1.setFoodName("Pizza");
+		foodDto1.setFoodCategory("Fast food");
+		foodDto1.setFoodPrice(399);
+		FoodDto rFoodDto = foodServiceImpl.createFood(foodDto1);
+		foodDto1.setFoodName("Burger");
+		foodDto1.setFoodCategory("Quick food");
+		foodDto1.setFoodPrice(99);
+		FoodDto rFoodDto1 = foodServiceImpl.updateFoodDetails(foodDto1.getFoodId(), foodDto1);
+		assert(rFoodDto1.getId() == 987654);
+		assert(rFoodDto1.getFoodId().equals("987654"));
+		assert(rFoodDto1.getFoodName().equals("Burger"));
+		assert(rFoodDto1.getFoodCategory().equals("Quick food"));
+		assert(rFoodDto1.getFoodPrice() == 99);
+		try{
+			FoodDto rFoodDto2 = foodServiceImpl.updateFoodDetails("98765", foodDto1);
+		}
+		catch (Exception e){
+			assert(e.getMessage().equals("98765"));
+		}
+	}
 
+	@Test
+	public void testDeleteFoodSuccess() {
+		FoodDto foodDto1 = new FoodDto();
+		foodDto1.setId(987654);
+		foodDto1.setFoodId("987654");
+		foodDto1.setFoodName("Pizza");
+		foodDto1.setFoodCategory("Fast food");
+		foodDto1.setFoodPrice(399);
+		FoodDto rFoodDto = foodServiceImpl.createFood(foodDto1);
+		foodServiceImpl.deleteFoodItem("987654");
+		try{
+			foodServiceImpl.deleteFoodItem("98765");
+		}
+		catch (Exception e){
+			assert(e.getMessage().equals("98765"));
+		}
+	}
+
+	@Test
+	public void testGetFoodsSuccess() {
+		FoodDto foodDto1 = new FoodDto();
+		foodDto1.setId(987654);
+		foodDto1.setFoodId("987654");
+		foodDto1.setFoodName("Pizza");
+		foodDto1.setFoodCategory("Fast food");
+		foodDto1.setFoodPrice(399);
+		FoodDto rFoodDto = foodServiceImpl.createFood(foodDto1);
+		List<FoodDto> rFoodDtoList = foodServiceImpl.getFoods();
+		assert(rFoodDtoList.size() == 1);
+		FoodDto rFoodDto1 = rFoodDtoList.get(0);
+		assert(rFoodDto1.getId() == 987654);
+		assert(rFoodDto1.getFoodId().equals("987654"));
+		assert(rFoodDto1.getFoodName().equals("Pizza"));
+		assert(rFoodDto1.getFoodCategory().equals("Fast food"));
+		assert(rFoodDto1.getFoodPrice() == 399);
+	}
 }
